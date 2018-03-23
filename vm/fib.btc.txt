@@ -23,36 +23,3 @@ movn eax 0
 ret
 movn eax 1
 ret
-mov eip eip
-mov eip eip
-mov eip eip
-mov eip eip
-mov eip eip
-mov eip eip
-mov eip eip
-mov eip eip
-mov eip eip
-mov eip eip
-mov eip eip
-mov eip eip
-mov eip eip
-mov eip eip
-mov eip eip
-mov eip eip
-mov eip eip
-mov eip eip
-mov eip eip
-mov eip eip
-mov eip eip
-mov eip eip
-mov eip eip
-mov eip eip
-mov eip eip
-mov eip eip
-mov eip eip
-mov eip eip
-mov eip eip
-mov eip eip
-mov eip eip
-mov eip eip
-mov eip eip

@@ -31,7 +31,7 @@ def make_asm_from_array(array, path_out):
     with open(path_out, mode='w') as command_file:
         pos = FIRST_COMMAND_ADDR
 
-        while pos < len(array):
+        while pos < len(array) - STATIC_SIZE - STACK_SIZE:
             line = [array[pos], array[pos+1], array[pos+2]]
             command_id = line[0]
             pos += 3
