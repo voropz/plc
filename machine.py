@@ -119,11 +119,18 @@ def MakeBinaryFromAsm(path_in, path_out):
         output = []
         output += [0] * len(registers)
         output[EIP] = FIRST_COMMAND_ADDR
-        static_offset = 0
+        statics = [0] * STATIC_SIZE
+        statics_pos = 0
 
         for line in command_file:
             line = line.split(" ;", 1)[0]
-            line = line.strip('\n').split(' ')
+            print_static = False
+            if line.startswith("print \""):
+                line = line.strip('\n').split('\"')[:-1]
+                line[0] = "print"
+                print_static = True
+            else:
+                line = line.strip('\n').split(' ')
 
             command_id = commands.get(line[0])
             output.extend([command_id])
@@ -154,8 +161,14 @@ def MakeBinaryFromAsm(path_in, path_out):
             elif command_id == END:
                 output.extend(parse_command(line))
             elif command_id == PRINT:
-                if line[1].startswith('\"'):
-                    output.extend([static_offset, 1])
+                if print_static:
+                    output.extend([statics_pos, 1])
+                    encoded = list(line[1].encode('utf-32'))
+                    statics[statics_pos] = len(encoded)
+                    statics_pos += 1
+                    for i in range(len(encoded)):
+                        statics[statics_pos] = encoded[i]
+                        statics_pos += 1
                 else:
                     output.extend(parse_command(line, "reg"))
             elif command_id == READN:
@@ -168,7 +181,7 @@ def MakeBinaryFromAsm(path_in, path_out):
         output[EBP] = len(output)
         output.extend([0] * STACK_SIZE)
         output[STC] = len(output)
-        output.extend([0] * STATIC_SIZE)
+        output.extend(statics)
         return output
 
 
@@ -234,8 +247,10 @@ class VirtualMachine:
 
     def print(self, where, mode):
         if mode == 1:  # static
-            # print(self.at(STC + where)
-            pass
+            start = self.at(STC) + where + 1
+            length = self.at(start - 1)
+            encoded = [self.at(start + i) for i in range(length)]
+            print(bytes(encoded).decode('utf-32'))
         else:
             print(self.at(where))
 
