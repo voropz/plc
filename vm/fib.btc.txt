@@ -1,0 +1,58 @@
+print ¬ведите число: 
+readn ebx
+call 6
+print eax
+end
+mov edx ebx
+subn edx 1
+jlz 22 edx
+subn edx 2
+jlz 24 edx
+push ebx
+subn ebx 2
+call 6
+mov ecx eax
+pop ebx
+subn ebx 1
+push ecx
+call 6
+pop ecx
+add eax ecx
+ret
+movn eax 0
+ret
+movn eax 1
+ret
+mov eip eip
+mov eip eip
+mov eip eip
+mov eip eip
+mov eip eip
+mov eip eip
+mov eip eip
+mov eip eip
+mov eip eip
+mov eip eip
+mov eip eip
+mov eip eip
+mov eip eip
+mov eip eip
+mov eip eip
+mov eip eip
+mov eip eip
+mov eip eip
+mov eip eip
+mov eip eip
+mov eip eip
+mov eip eip
+mov eip eip
+mov eip eip
+mov eip eip
+mov eip eip
+mov eip eip
+mov eip eip
+mov eip eip
+mov eip eip
+mov eip eip
+mov eip eip
+mov eip eip
