@@ -29,15 +29,31 @@ def parse_command(line, arg1_type=None, arg2_type=None):
     return [arg1, arg2]
 
 
-def make_array_from_asm(path_in):
+def translate_labels(path_in):
     with open(path_in, mode='r') as command_file:
+        labels = []
+        pos = 1
+        for line in command_file:
+            if line.startswith("label"):
+                line = line.strip(":\n").split(' ')[1]
+                labels.append((line, pos))
+                continue
+            pos += 1
+        return dict(labels)
+
+
+def make_array_from_asm(path_in):
+    labels = translate_labels(path_in)
+    with open(path_in, mode='r', encoding='utf-8') as command_file:
         output = []
         output += [0] * len(registers)
         output[EIP] = FIRST_COMMAND_ADDR
-        statics = [0] * STATIC_SIZE
+        statics = []
         statics_pos = 0
 
         for line in command_file:
+            if line.startswith("label"):
+                continue
             line = line.split(" ;", 1)[0]
             print_static = False
             if line.startswith("print \""):
@@ -62,14 +78,17 @@ def make_array_from_asm(path_in):
             elif command_id == SUBN:
                 output.extend(parse_command(line, "reg", "int"))
             elif command_id == JMP:
+                line[1] = labels.get(line[1], line[1])
                 output.extend(parse_command(line, "line"))
             elif command_id == JLZ:
+                line[1] = labels.get(line[1], line[1])
                 output.extend(parse_command(line, "line", "reg"))
             elif command_id == PUSH:
                 output.extend(parse_command(line, "reg"))
             elif command_id == POP:
                 output.extend(parse_command(line, "reg"))
             elif command_id == CALL:
+                line[1] = labels.get(line[1], line[1])
                 output.extend(parse_command(line, "line"))
             elif command_id == RET:
                 output.extend(parse_command(line))
@@ -79,11 +98,17 @@ def make_array_from_asm(path_in):
                 if print_static:
                     output.extend([statics_pos, 1])
                     encoded = list(line[1].encode('utf-8'))
-                    statics[statics_pos] = len(encoded)
-                    statics_pos += 1
-                    for i in range(len(encoded)):
-                        statics[statics_pos] = encoded[i]
-                        statics_pos += 1
+                    encoded.extend([0] * (4 - len(encoded) % 4))
+                    packed = np.zeros(len(encoded) // 4, dtype=np.uint)
+                    for i in np.arange(0, len(encoded), 4):
+                        packed[i//4] = ((encoded[i] << 24) +
+                                        (encoded[i + 1] << 16) +
+                                        (encoded[i + 2] << 8) +
+                                        (encoded[i + 3]))
+
+                    statics.append(len(packed))
+                    statics_pos += 1 + len(packed)
+                    statics.extend(packed.view(dtype=np.int))
                 else:
                     output.extend(parse_command(line, "reg"))
             elif command_id == READN:
@@ -101,7 +126,7 @@ def make_array_from_asm(path_in):
 
 
 def write_array_as_bytes(array, path_out):
-    np.array(array, dtype=int).tofile(path_out)
+        np.array(array, dtype=np.int).tofile(path_out)
 
 
 if __name__ == '__main__':

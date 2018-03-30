@@ -1,25 +1,28 @@
-print "Введите число: "
-readn ebx  ; eax для возврата, ebx -- параметр функции
-call 6  ; самая внешняя функция f(n)
+print "Р’РІРµРґРёС‚Рµ С‡РёСЃР»Рѕ: "
+readn ebx  ; eax РґР»СЏ РІРѕР·РІСЂР°С‚Р°, ebx -- РїР°СЂР°РјРµС‚СЂ С„СѓРЅРєС†РёРё
+call fib  ; СЃР°РјР°СЏ РІРЅРµС€РЅСЏСЏ С„СѓРЅРєС†РёСЏ f(n)
 print eax 
 end
-mov edx ebx  ; копируем ebx, чтобы не мучить его лишние разы
+label fib:
+mov edx ebx  ; РєРѕРїРёСЂСѓРµРј ebx, С‡С‚РѕР±С‹ РЅРµ РјСѓС‡РёС‚СЊ РµРіРѕ Р»РёС€РЅРёРµ СЂР°Р·С‹
 subn edx 1
-jlz 22 edx  ; n = 0
-subn edx 2  ; n = 1 или 2
-jlz 24 edx
-push ebx  ; сохраним ebx на будущее. Вообще говоря, оно не нужно :)
+jlz base0 edx  ; n = 0
+subn edx 2  ; n = 1 РёР»Рё 2
+jlz base12 edx
+push ebx  ; СЃРѕС…СЂР°РЅРёРј ebx РЅР° Р±СѓРґСѓС‰РµРµ. Р’РѕРѕР±С‰Рµ РіРѕРІРѕСЂСЏ, РѕРЅРѕ РЅРµ РЅСѓР¶РЅРѕ :)
 subn ebx 2
-call 6  ; f(n-2)
+call fib  ; f(n-2)
 mov ecx eax
 pop ebx
 subn ebx 1
 push ecx
-call 6  ; f(n-1)
+call fib  ; f(n-1)
 pop ecx
 add eax ecx  ; ret = f(n-1) + f(n-2)
 ret
+label base0:
 movn eax 0  ; f(0)
 ret
+label base12:
 movn eax 1  ; f(1) f(2)
 ret

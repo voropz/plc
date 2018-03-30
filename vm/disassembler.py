@@ -31,7 +31,7 @@ def make_asm_from_array(array, path_out):
     with open(path_out, mode='w') as command_file:
         pos = FIRST_COMMAND_ADDR
 
-        while pos < len(array) - STATIC_SIZE - STACK_SIZE:
+        while pos < array[STC] - STACK_SIZE:
             line = [array[pos], array[pos+1], array[pos+2]]
             command_id = line[0]
             pos += 3
@@ -63,7 +63,7 @@ def make_asm_from_array(array, path_out):
                 command_file.write(parse_command(line))
             elif command_id == PRINT:
                 if line[2] == 1:
-                    start = line[1] + 1 + len(array) - STATIC_SIZE
+                    start = line[1] + 1 + array[STC]
                     length = array[start - 1]
                     encoded = array[start:start + length]
                     decoded = bytes(list(encoded)).decode('utf-8')

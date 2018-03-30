@@ -7,7 +7,7 @@ from common import *
 class BinaryFile:
     def __init__(self, path):
         self.path = path
-        self.buff = np.fromfile(path, dtype=int)
+        self.buff = np.fromfile(path, dtype=np.int)
         self.size = len(self.buff)
 
     def write(self, address, data):
@@ -28,13 +28,13 @@ class BinaryFile:
     def dump(self, path=None):
         if path is None:
             path = self.path
-        self.buff.tofile(path, dtype=int)
+        self.buff.tofile(path, dtype=np.int)
 
 
 class VirtualMachine:
     def __init__(self, memory):
         self.memory = memory
-        self.private_reg = [EIP, ESP, EBP]
+        self.private_reg = [EIP, ESP, EBP, STC, NIU]
 
     def Run(self):
         while self.run_next_command():
@@ -64,7 +64,7 @@ class VirtualMachine:
     def jmp(self, where):
         Check(where > EDX, "Попытка исполнения данных")
         # после всех команд происходит сдвиг, который компенсируется -3
-        self.memory.write(EIP, where - 3)
+        self.memory.write(EIP, where - COMMAND_LEN)
 
     def jlz(self, where, why):
         if self.at(why) < 0:
@@ -95,8 +95,13 @@ class VirtualMachine:
         if mode == 1:  # static
             start = self.at(STC) + where + 1
             length = self.at(start - 1)
-            encoded = [self.at(start + i) for i in range(length)]
-            print(bytes(encoded).decode('utf-8'))
+            mask = [255 << 24, 255 << 16, 255 << 8, 255]
+            packed = [self.at(start + i) for i in range(length)]
+            packed = np.array(packed).view(np.uint)
+            encoded = []
+            for cell in packed:
+                encoded.extend([cell >> 24, (cell & mask[1]) >> 16, (cell & mask[2]) >> 8, cell & mask[3]])
+            print(bytes(encoded).decode('utf-8').strip(' '))
         else:
             print(self.at(where))
 

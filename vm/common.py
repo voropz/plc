@@ -2,7 +2,6 @@ DEBUG = False
 
 COMMAND_LEN = 3
 STACK_SIZE = 33 * 3
-STATIC_SIZE = 33 * 3
 
 
 def Check(condition, error_string="Неизвестная ошибка"):
