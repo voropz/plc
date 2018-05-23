@@ -23,20 +23,20 @@ struct Object {
 		\
 		static Vtable vtable;\
 		\
-		Base(int a = 0)\
-			:vtablePtr(&Base::vtable), a(a) {}\
-		static void declare_method(const std::string& name);
+		class_name()\
+			:vtablePtr(&class_name::vtable) {}\
+		static void declare_method(const std::string& name, std::function<void(class_name*)> f);
 
 // -------------------------
 
-#define END(class_name, variable_name)\
+#define END(class_name)\
 	 }; \
 	Vtable class_name::vtable; \
 \
-void class_name::declare_method(const std::string& name) {\
-	std::function<void(Object* obj)> func = [name](Object* obj) {\
+void class_name::declare_method(const std::string& name, std::function<void(class_name*)> f) {\
+	std::function<void(Object* obj)> func = [name, f](Object* obj) {\
 		class_name* me = reinterpret_cast<class_name*>(obj);\
-		std::cout << #class_name << "::" << name << "\t" << me->variable_name << "\n"; };\
+		f(me); };\
 	vtable.insert({ name, func });\
 }
 
@@ -45,14 +45,14 @@ void class_name::declare_method(const std::string& name) {\
 #define VIRTUAL_CLASS_DERIVED(class_name, base_name)\
 	struct class_name {\
 		Vtable* vtablePtr; \
-		Base* base; \
+		base_name* base; \
 	\
 		static Vtable vtable; \
 	\
-		class_name(int b = 1)\
-			:vtablePtr(&Derived::vtable), b(b), base(new base_name()) {}\
+		class_name()\
+			:vtablePtr(&class_name::vtable), base(new base_name()) {}\
 		~class_name() {}\
-		static void declare_method(const std::string& name);
+		static void declare_method(const std::string& name, std::function<void(class_name*)> f);
 
 // -------------------------
 
@@ -79,4 +79,4 @@ void virtual_call(void* ptr, const std::string& method) {
 
 // -------------------------
 
-#define DECLARE_METHOD(class_name, name) class_name::declare_method(#name)  
+#define DECLARE_METHOD(class_name, name, text) class_name::declare_method(#name, [](class_name* _this) {text})  

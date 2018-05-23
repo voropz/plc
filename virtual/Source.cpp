@@ -1,30 +1,30 @@
 #include "virtual_header.h"
 
-VIRTUAL_CLASS(Base)
+VIRTUAL_CLASS(Base1)
 	int a;
-END(Base, a)
+END(Base1)
 
-VIRTUAL_CLASS_DERIVED(Derived, Base)
+VIRTUAL_CLASS_DERIVED(Derived2, Base1)
 	int b;
-END(Derived, b)
+END(Derived2)
 
 int main() {
-	DECLARE_METHOD(Base, both);
-	DECLARE_METHOD(Base, base);
-	DECLARE_METHOD(Derived, both);
-	DECLARE_METHOD(Derived, der);
+	DECLARE_METHOD(Base1, both, std::cout << "BOTH " << _this->a << std::endl;);
+	DECLARE_METHOD(Base1, base, std::cout << "BASE " << _this->a << std::endl;);
+	DECLARE_METHOD(Derived2, both, std::cout << "BOTH " << _this->b << std::endl;);
+	DECLARE_METHOD(Derived2, der, std::cout << "DER " << _this->b << std::endl;);
 
-	Base base;
+	Base1 base;
 	base.a = 42;
-	Derived derived;
+	Derived2 derived;
 	derived.b = 24;
 	derived.base->a = 100500;
-	Base* test = reinterpret_cast<Base*>(&derived);
+	Base1* test = reinterpret_cast<Base1*>(&derived);
 
-	VIRTUAL_CALL(&base, "base"); // base.a = 
-	VIRTUAL_CALL(test, "both");  // derived.b = 
-	VIRTUAL_CALL(test, "base");  // derived->base.a = (0 по умолчанию)
-	VIRTUAL_CALL(test, "der");  // derived.b = 
+	VIRTUAL_CALL(&base, "both"); // base.a = 42
+	VIRTUAL_CALL(test, "both");  // derived.b = 24
+	VIRTUAL_CALL(test, "base");  // derived.base.a = 100500
+	VIRTUAL_CALL(test, "der");  // derived.b = 24
 	system("pause");
 
 	VIRTUAL_CALL(&base, "der");  // падает
